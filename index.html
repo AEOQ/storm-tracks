@@ -1,48 +1,48 @@
 <!DOCTYPE html>
 <script src="https://aeoq.github.io/drag-knob/script.js" type="module"></script>
 <link rel="stylesheet" href="./index.css">
-<section>
-    <figure>
-        <svg viewBox="17.302 109.174 10 10">
-            <marker id="point" viewBox="-1 -1 2 2"><circle cx="0" cy="0" r=".5"></circle></marker>
-            <circle cx="22.302" cy="114.174" r="0.45"></circle><text x="22.302" y="113.724">50</text>
-            <circle cx="22.302" cy="114.174" r="0.9"></circle><text x="22.302" y="113.274">100</text>
-            <circle cx="22.302" cy="114.174" r="1.8"></circle><text x="22.302" y="112.374">200</text>
-            <circle cx="22.302" cy="114.174" r="2.7"></circle><text x="22.302" y="111.474">300</text>
-            <circle cx="22.302" cy="114.174" r="3.6"></circle><text x="22.302" y="110.574">400</text>
-            <circle cx="22.302" cy="114.174" r="4.5"></circle><text x="22.302" y="109.674">500</text>
-        </svg>
-        <figcaption></figcaption>
-    </figure>
-    <form>
-        <continuous-knob min="0" max="45" value="10" snap="10" step="5" title="r"></continuous-knob>
-        <continuous-knob min="-15" max="15" value="0" step="5" title="w"></continuous-knob>
-        <continuous-knob min="-15" max="15" value="0" step="5" title="s"></continuous-knob>
-        <continuous-knob min="-15" max="15" value="0" step="5" title="e"></continuous-knob>
-        <continuous-knob class="fine" min="1.01" max="1.5" value="1.12" step="0.01" title="ratio" name="ratio"></continuous-knob>
-    </form>
-</section>
+<figure>
+    <svg viewBox="17.302 109.174 10 10">
+        <marker id="point" viewBox="-1 -1 2 2"><circle cx="0" cy="0" r=".5"></circle></marker>
+        <circle cx="22.302" cy="114.174" r="0.45"></circle><text x="22.302" y="113.724">50</text>
+        <circle cx="22.302" cy="114.174" r="0.9"></circle><text x="22.302" y="113.274">100</text>
+        <circle cx="22.302" cy="114.174" r="1.8"></circle><text x="22.302" y="112.374">200</text>
+        <circle cx="22.302" cy="114.174" r="2.7"></circle><text x="22.302" y="111.474">300</text>
+        <circle cx="22.302" cy="114.174" r="3.6"></circle><text x="22.302" y="110.574">400</text>
+        <circle cx="22.302" cy="114.174" r="4.5"></circle><text x="22.302" y="109.674">500</text>
+    </svg>
+</figure>
+<form>
+    <continuous-knob unit="°" min="0" max="45" value="10" step="5" title="rotate"></continuous-knob>
+    <continuous-knob unit="°" min="-15" max="15" value="0" step="5" name="E" title="E"><output></output></continuous-knob>
+    <continuous-knob unit="°" min="-15" max="15" value="0" step="5" name="S" title="S"><output></output></continuous-knob>
+    <continuous-knob unit="°" min="-15" max="15" value="0" step="5" name="W" title="W"><output></output></continuous-knob><br>
+    <continuous-knob class="fine" min="1.01" max="1.5" value="1.11" step="0.01" title="區CPA除總CPA比" name="ratio"></continuous-knob>
+    <continuous-knob unit=" km" min="50" max="150" value="150" step="5" title="南掠烈風必然距離" name="south"></continuous-knob>
+    <continuous-knob unit=" km" min="50" max="150" value="75" step="5" title="北掠烈風必然距離" name="north"></continuous-knob>
+</form>
 <table></table>
 
 <script type="module">
     import {A,E,O,Q} from 'https://aeoq.github.io/AEOQ.mjs'
-    let data, init;
-    Q('form').oninput = ev => {
-        let fig = E(Q('figure'));
+    let data, init, form = Q('form'), fig = E(Q('figure'));
+    form.oninput = ev => {
         ev && fig.set({[`--${ev.target.title}`]: ev.target.value});
-        let r = fig.get('--r');
+        let {'--rotate': r, ...param} = fig.get('--rotate', '--E', '--S', '--W');
         let bearings = new O({
-            east:  [45                -r, fig.get('--e')+135-r],
-            south: [fig.get('--e')+135-r, fig.get('--s')+225-r],
-            west:  [fig.get('--s')+225-r, fig.get('--w')+315-r],
-            north: [fig.get('--w')+315-r, 45                -r]
+            East:  [              45-r, form.E.value+135-r],
+            South: [form.E.value+135-r, form.S.value+225-r],
+            West:  [form.S.value+225-r, form.W.value+315-r],
+            North: [form.W.value+315-r,               45-r]
         });
-        Q('figcaption').innerText = [...bearings.values()].map(([from, to]) => to-from < 0 ? to-from+360 : to-from);
+        bearings.each(([dir, [from, to]]) => 
+            form[dir[0]] && (form[dir[0]].Q('output').value = to - from < 0 ? to - from + 360 : to - from)
+        );
         let result = data?.map(([tc, points]) => [tc, classify(points, bearings)])
             .map(([tc, obj]) => { 
                 let cpa = Math.min(...[...obj.values()].map(km => Math.round(km ?? 999)));
-                obj = obj.filter(([dir, km]) => km && (km <= 150 || km / cpa < Q('form').ratio.value));
-                obj.north && (obj = obj.filter(([dir, km]) => km && (km <= 75 || km / cpa < Q('form').ratio.value)));
+                obj = obj.filter(([dir, km]) => km && (km <= form.south.value || km / cpa < form.ratio.value));
+                obj.North && (obj = obj.filter(([dir, km]) => km && (km <= form.north.value || km / cpa < form.ratio.value)));
                 return [tc, `${[...obj.keys().map(q => q[0])]}`]; 
             });
         init ??= result;
@@ -51,35 +51,32 @@
             .map(([tc, quads]) => 
                 E('tr', [E('td', tc), E('td', quads)], {
                     onclick: ev => {
-                        ev.target.parentElement.classList.toggle('showing');
-                        Q(`[id='${tc}']`).classList.toggle('hidden');
+                        ev.target.closest('tr').classList.toggle('showing');
+                        Q(`[id='${tc}']`).classList.toggle('showing');
                     },
-                    classList: Q(`[id='${tc}'].hidden`) ? '' : 'showing',
-                    ...quads != init[tc] ? {style: {color: 'pink'}} : {}
+                    classList: Q(`[id='${tc}'].showing`) ? 'showing' : '',
+                    ...quads != init[tc] ? {style: {color: 'yellow'}} : {}
                 })
             )
         );
     }
     fetch('./lens.json').then(resp => resp.json()).then(d => {
         data = new O(d);
-        data.each(([tc, points]) => draw(tc, points));
+        data.each(([tc, points]) => Q('svg').append(
+            E('path', {d: `M${points.join('L')}`, 'marker-mid': 'url(#point)', id: tc}),
+        ));
         Q('form').oninput();
     });
 
-    const draw = (tc, points) =>
-        Q('svg').append(
-            E('path', {d: `M${points.join('L')}`, 'marker-mid': 'url(#point)', id: tc, classList: 'hidden'}),
-        );
     const classify = (points, bearings) => {
         const R = 6371;
         const toRadians = (degrees) => degrees * Math.PI / 180;
-        const output = { north: [], south: [], east: [], west: [] }
+        const output = { North: [], South: [], East: [], West: [] };
 
         const lat1Rad = toRadians(22.302), lon1Rad = toRadians(114.174);
         let cpa = 800;
         points.forEach(point => {
             const lat2Rad = toRadians(point[0]), lon2Rad = toRadians(point[1]);
-
             const dLat = lat2Rad - lat1Rad, dLon = lon2Rad - lon1Rad;
 
             const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.sin(dLon / 2) ** 2;
@@ -90,7 +87,7 @@
             const y = Math.sin(dLon) * Math.cos(lat2Rad);
             const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLon);
             let bearing = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-            let dir = bearings.find(([dir, [from, to]]) => bearing < to && bearing >= from)?.[0] ?? 'north';
+            let dir = bearings.find(([dir, [from, to]]) => bearing < to && bearing >= from)?.[0] ?? 'North';
             output[dir].push(distance);
         });
         return new O(output).map(([quad, dists]) => [quad, Math.min(...dists)]);

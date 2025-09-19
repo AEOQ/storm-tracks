@@ -2,10 +2,16 @@ html {
     background: black; color: white;
     --light: turquoise;
 }
-body {display: flex;}
+body {
+    display: grid; grid-template: 'radar list' 30em 'form list' / 30em min-content;
+    gap: 1em;
+    margin: 1em auto;
+    width: min-content;
+}
 
 figure {
-    width: 30em; height: 30em;
+    grid-area: radar;
+    margin: 0;
     position: relative;
 
     &::before {
@@ -14,46 +20,65 @@ figure {
         z-index: -1;
         border-radius: 99em;
         background: conic-gradient(
-            white 0 calc(90deg + var(--e,0)*1deg),
-            silver calc(90deg + var(--e,0)*1deg) calc(180deg + var(--s,0)*1deg),
-            white calc(180deg + var(--s,0)*1deg) calc(270deg + var(--w,0)*1deg),
-            silver calc(270deg + var(--w,0)*1deg) 0
+            white 0 calc(90deg + var(--E,0)*1deg),
+            silver calc(90deg + var(--E,0)*1deg) calc(180deg + var(--S,0)*1deg),
+            white calc(180deg + var(--S,0)*1deg) calc(270deg + var(--W,0)*1deg),
+            silver calc(270deg + var(--W,0)*1deg) 0
         );
-        transform: rotate(calc(45deg + var(--r,0)*-1deg));
+        transform: rotate(calc(45deg + var(--rotate,0)*-1deg));
+    }
+    svg {
+        transform: rotate(-90deg);
+        overflow: hidden;
+        border-radius: 99em;
+
+        text {
+            font-size: .4px;
+            text-anchor: middle;
+            transform: rotate(90deg); transform-origin: 22.302px 114.174px;
+        }
+        path {
+            stroke-width: .05; stroke: black;
+            fill: none;
+
+            &:not(.showing) {display: none;}
+        }
+        #point {
+            fill: brown;
+        }
+        &>circle {
+            stroke: blue; stroke-width: .025;
+            fill: none;
+        }
     }
 }
-svg {
-    transform: rotate(-90deg);
-    overflow: hidden;
-    border-radius: 99em;
+form {
+    grid-area: form; justify-self: center;
 
-    text {
-        font-size: .4px;
-        text-anchor: middle;
-        transform: rotate(90deg); transform-origin: 22.302px 114.174px;
-    }
-    path {
-        stroke-width: .05; stroke: black;
-        fill: none;
+    continuous-knob {
+        position: relative;
 
-        &.hidden {display: none;}
+        &::before {
+            line-height: 1.1;
+            font-size: .9em;
+        }
+        output {
+            grid-area: 2/1/3/2; align-self: center;
+            pointer-events: none;
+
+            &::after {content: '°';}
+        }
     }
-    #point {
-        fill: brown;
-    }
-    &>circle {
-        stroke: blue; stroke-width: .025;
-        fill: none;
-    }
+    br~continuous-knob {margin-top: 1em;}
 }
-tr {
-    text-transform: uppercase;
-    user-select: none;
+table {
+    grid-area: list;
 
-    &::before {
-        content: '⬜';
-    }
-    &.showing::before {
-        content: '🔳';
+    tr {
+        text-transform: uppercase;
+        user-select: none;
+    
+        &::before {content: '⬜';}
+        &.showing::before {content: '🔳';}
     }
 }
