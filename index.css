@@ -52,6 +52,7 @@ tr {
 
     &::before {
         content: '⬜';
+        pointer-events: none;
     }
     &.showing::before {
         content: '🔳';
