@@ -32,8 +32,8 @@
     form.oninput = ev => {
         if (ev?.target.tagName == 'TEXTAREA') {
             Q('path:not([id])')?.remove();
-            let points = ev.target.value.split('\n').filter(row => /^[.\d]+ [.\d]+$/.test(row));
-            ev.target.title = filter(classify(points, getBearings()));
+            let points = ev.target.value.split('\n').filter(row => /^[.\d]+ [.\d]+$/.test(row)).map(row => row.split(' '));
+            form.title = filter(classify(points, getBearings()));
             return Q('svg').append(
                 E('path.showing', {d: `M${points.join('L')}`, 'marker-mid': 'url(#point)'}),
             );
