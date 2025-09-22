@@ -80,7 +80,7 @@
         let cpa = Math.min(...[...classified.values()].map(km => Math.round(km ?? 999)));
         let filtered = classified.filter(([dir, km]) => km && (km <= form.south.value || km / cpa < form.ratio.value));
         filtered.North && (filtered = filtered.filter(([dir, km]) => km && (km <= form.north.value || km / cpa < form.ratio.value)));
-        return `${[...obj.keys().map(q => q[0])]}`;
+        return `${[...filtered.keys().map(q => q[0])]}`;
     }
     const classify = (points, bearings) => {
         const R = 6371;
