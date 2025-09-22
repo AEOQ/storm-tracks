@@ -54,6 +54,7 @@ figure {
 }
 form {
     grid-area: form; justify-self: center;
+    display: flex;
 
     continuous-knob {
         position: relative;
@@ -70,6 +71,10 @@ form {
         }
     }
     br~continuous-knob {margin-top: 1em;}
+
+    fieldset {
+        border: none;
+    }
 }
 table {
     grid-area: list;

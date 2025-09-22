@@ -13,13 +13,16 @@
     </svg>
 </figure>
 <form>
-    <continuous-knob unit="°" min="0" max="45" value="10" step="5" title="rotate"></continuous-knob>
-    <continuous-knob unit="°" min="-15" max="15" value="0" step="5" name="E" title="E"><output></output></continuous-knob>
-    <continuous-knob unit="°" min="-15" max="15" value="0" step="5" name="S" title="S"><output></output></continuous-knob>
-    <continuous-knob unit="°" min="-15" max="15" value="0" step="5" name="W" title="W"><output></output></continuous-knob><br>
-    <continuous-knob class="fine" min="1.01" max="1.5" value="1.11" step="0.01" title="區CPA除總CPA比" name="ratio"></continuous-knob>
-    <continuous-knob unit=" km" min="50" max="150" value="150" step="5" title="南掠烈風必然距離" name="south"></continuous-knob>
-    <continuous-knob unit=" km" min="50" max="150" value="75" step="5" title="北掠烈風必然距離" name="north"></continuous-knob>
+    <fieldset>
+        <continuous-knob unit="°" min="0" max="45" value="10" step="5" title="rotate"></continuous-knob>
+        <continuous-knob unit="°" min="-15" max="15" value="0" step="5" name="E" title="E"><output></output></continuous-knob>
+        <continuous-knob unit="°" min="-15" max="15" value="0" step="5" name="S" title="S"><output></output></continuous-knob>
+        <continuous-knob unit="°" min="-15" max="15" value="0" step="5" name="W" title="W"><output></output></continuous-knob><br>
+        <continuous-knob class="fine" min="1.01" max="1.5" value="1.11" step="0.01" title="區CPA除總CPA比" name="ratio"></continuous-knob>
+        <continuous-knob unit=" km" min="50" max="150" value="150" step="5" title="南掠烈風必然距離" name="south"></continuous-knob>
+        <continuous-knob unit=" km" min="50" max="150" value="75" step="5" title="北掠烈風必然距離" name="north"></continuous-knob>
+    </fieldset>
+    <textarea name="current"></textarea>
 </form>
 <table></table>
 
@@ -27,6 +30,13 @@
     import {A,E,O,Q} from 'https://aeoq.github.io/AEOQ.mjs'
     let data, init, form = Q('form'), fig = E(Q('figure'));
     form.oninput = ev => {
+        if (ev.target.tagName == 'TEXTAREA') {
+            Q('path:not([id])')?.remove();
+            let points = ev.target.value.split('\n').filter(row => /^[.\d]+ [.\d]+$/.test(row));
+            return Q('svg').append(
+                E('path', {d: `M${points.join('L')}`, 'marker-mid': 'url(#point)'}),
+            );
+        }
         ev && fig.set({[`--${ev.target.title}`]: ev.target.value});
         let {'--rotate': r, ...param} = fig.get('--rotate', '--E', '--S', '--W');
         let bearings = new O({
