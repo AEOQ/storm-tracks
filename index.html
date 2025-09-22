@@ -34,7 +34,7 @@
             Q('path:not([id])')?.remove();
             let points = ev.target.value.split('\n').filter(row => /^[.\d]+ [.\d]+$/.test(row));
             return Q('svg').append(
-                E('path', {d: `M${points.join('L')}`, 'marker-mid': 'url(#point)'}),
+                E('path.showing', {d: `M${points.join('L')}`, 'marker-mid': 'url(#point)'}),
             );
         }
         ev && fig.set({[`--${ev.target.title}`]: ev.target.value});
