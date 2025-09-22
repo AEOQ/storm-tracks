@@ -33,28 +33,17 @@
         if (ev?.target.tagName == 'TEXTAREA') {
             Q('path:not([id])')?.remove();
             let points = ev.target.value.split('\n').filter(row => /^[.\d]+ [.\d]+$/.test(row));
+            ev.target.title = filter(classify(points, getBearings()));
             return Q('svg').append(
                 E('path.showing', {d: `M${points.join('L')}`, 'marker-mid': 'url(#point)'}),
             );
         }
         ev && fig.set({[`--${ev.target.title}`]: ev.target.value});
-        let {'--rotate': r, ...param} = fig.get('--rotate', '--E', '--S', '--W');
-        let bearings = new O({
-            East:  [              45-r, form.E.value+135-r],
-            South: [form.E.value+135-r, form.S.value+225-r],
-            West:  [form.S.value+225-r, form.W.value+315-r],
-            North: [form.W.value+315-r,               45-r]
-        });
+        let bearings = getBearings();
         bearings.each(([dir, [from, to]]) => 
             form[dir[0]] && (form[dir[0]].Q('output').value = to - from < 0 ? to - from + 360 : to - from)
         );
-        let result = data?.map(([tc, points]) => [tc, classify(points, bearings)])
-            .map(([tc, obj]) => { 
-                let cpa = Math.min(...[...obj.values()].map(km => Math.round(km ?? 999)));
-                obj = obj.filter(([dir, km]) => km && (km <= form.south.value || km / cpa < form.ratio.value));
-                obj.North && (obj = obj.filter(([dir, km]) => km && (km <= form.north.value || km / cpa < form.ratio.value)));
-                return [tc, `${[...obj.keys().map(q => q[0])]}`]; 
-            });
+        let result = data?.map(([tc, points]) => [tc, filter(classify(points, bearings))]);
         init ??= result;
         result && Q('table').replaceChildren(...[...result]
             .sort(([, quad1], [, quad2]) => quad1 > quad2 ? 1 : quad1 < quad2 ? -1 : 0)
@@ -78,6 +67,21 @@
         Q('form').oninput();
     });
 
+    const getBearings = () => {
+        let {'--rotate': r, ...param} = fig.get('--rotate', '--E', '--S', '--W');
+        return bearings = new O({
+            East:  [              45-r, form.E.value+135-r],
+            South: [form.E.value+135-r, form.S.value+225-r],
+            West:  [form.S.value+225-r, form.W.value+315-r],
+            North: [form.W.value+315-r,               45-r]
+        });
+    }
+    const filter = (classified) => {
+        let cpa = Math.min(...[...filtered.values()].map(km => Math.round(km ?? 999)));
+        let filtered = classified.filter(([dir, km]) => km && (km <= form.south.value || km / cpa < form.ratio.value));
+        filtered.North && (filtered = filtered.filter(([dir, km]) => km && (km <= form.north.value || km / cpa < form.ratio.value)));
+        return `${[...obj.keys().map(q => q[0])]}`;
+    }
     const classify = (points, bearings) => {
         const R = 6371;
         const toRadians = (degrees) => degrees * Math.PI / 180;
