@@ -54,7 +54,7 @@ figure {
 }
 form {
     grid-area: form; justify-self: center;
-    display: flex;
+    display: flex; flex-wrap: wrap;
 
     continuous-knob {
         position: relative;
@@ -74,6 +74,11 @@ form {
 
     fieldset {
         border: none;
+    }
+    &::after {
+        content: attr(title);
+        width: 100%; 
+        text-align: right;
     }
 }
 table {

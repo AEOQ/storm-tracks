@@ -69,7 +69,7 @@
 
     const getBearings = () => {
         let {'--rotate': r, ...param} = fig.get('--rotate', '--E', '--S', '--W');
-        return bearings = new O({
+        return new O({
             East:  [              45-r, form.E.value+135-r],
             South: [form.E.value+135-r, form.S.value+225-r],
             West:  [form.S.value+225-r, form.W.value+315-r],
