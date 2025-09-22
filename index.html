@@ -30,7 +30,7 @@
     import {A,E,O,Q} from 'https://aeoq.github.io/AEOQ.mjs'
     let data, init, form = Q('form'), fig = E(Q('figure'));
     form.oninput = ev => {
-        if (ev.target.tagName == 'TEXTAREA') {
+        if (ev?.target.tagName == 'TEXTAREA') {
             Q('path:not([id])')?.remove();
             let points = ev.target.value.split('\n').filter(row => /^[.\d]+ [.\d]+$/.test(row));
             return Q('svg').append(
