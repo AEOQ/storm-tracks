@@ -77,7 +77,7 @@
         });
     }
     const filter = (classified) => {
-        let cpa = Math.min(...[...filtered.values()].map(km => Math.round(km ?? 999)));
+        let cpa = Math.min(...[...classified.values()].map(km => Math.round(km ?? 999)));
         let filtered = classified.filter(([dir, km]) => km && (km <= form.south.value || km / cpa < form.ratio.value));
         filtered.North && (filtered = filtered.filter(([dir, km]) => km && (km <= form.north.value || km / cpa < form.ratio.value)));
         return `${[...obj.keys().map(q => q[0])]}`;
