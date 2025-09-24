@@ -29,10 +29,10 @@
 <script type="module">
     import {A,E,O,Q} from 'https://aeoq.github.io/AEOQ.mjs'
     let data, init, form = Q('form'), fig = E(Q('figure'));
-    Q('textarea').value = localStorage.get('current') || '';
+    Q('textarea').value = localStorage.getItem('current') || '';
     form.oninput = ev => {
         if (ev?.target.tagName == 'TEXTAREA') {
-            localStorage.set('current', ev.target.value);
+            localStorage.setItem('current', ev.target.value);
             Q('path:not([id])')?.remove();
             let points = ev.target.value.split('\n').filter(row => /^[.\d]+ [.\d]+$/.test(row)).map(row => row.split(' '));
             form.title = filter(classify(points, getBearings()));
