@@ -22,21 +22,21 @@
         <continuous-knob unit=" km" min="50" max="150" value="150" step="5" title="南掠烈風必然距離" name="south"></continuous-knob>
         <continuous-knob unit=" km" min="50" max="150" value="75" step="5" title="北掠烈風必然距離" name="north"></continuous-knob>
     </fieldset>
-    <textarea name="current"></textarea>
+    <textarea></textarea>
 </form>
 <table></table>
 
 <script type="module">
     import {A,E,O,Q} from 'https://aeoq.github.io/AEOQ.mjs'
     let data, init, form = Q('form'), fig = E(Q('figure'));
+    Q('textarea').value = localStorage.get('current') || '';
     form.oninput = ev => {
         if (ev?.target.tagName == 'TEXTAREA') {
+            localStorage.set('current', ev.target.value);
             Q('path:not([id])')?.remove();
             let points = ev.target.value.split('\n').filter(row => /^[.\d]+ [.\d]+$/.test(row)).map(row => row.split(' '));
             form.title = filter(classify(points, getBearings()));
-            return Q('svg').append(
-                E('path.showing', {d: `M${points.join('L')}`, 'marker-mid': 'url(#point)'}),
-            );
+            return Q('svg').append(E('path.showing', {d: `M${points.join('L')}`}));
         }
         ev && fig.set({[`--${ev.target.title}`]: ev.target.value});
         let bearings = getBearings();
@@ -62,7 +62,7 @@
     fetch('./lens.json').then(resp => resp.json()).then(d => {
         data = new O(d);
         data.each(([tc, points]) => Q('svg').append(
-            E('path', {d: `M${points.join('L')}`, 'marker-mid': 'url(#point)', id: tc}),
+            E('path', {d: `M${points.join('L')}`, id: tc}),
         ));
         Q('form').oninput();
     });

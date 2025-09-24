@@ -40,8 +40,10 @@ figure {
         path {
             stroke-width: .05; stroke: black;
             fill: none;
+            marker-start: url(#point); marker-mid: url(#point); marker-end: url(#point);
 
             &:not(.showing) {display: none;}
+            &:not([id]) {stroke: coral;}
         }
         #point {
             fill: brown;

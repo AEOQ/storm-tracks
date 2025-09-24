@@ -18,38 +18,3 @@ tcs.reduce((prom, tc) => prom
         );
     }), Promise.resolve())
 .then(() => fs.promises.writeFile('lens.json', JSON.stringify(out)))
-
-function cal(points) {
-    const R = 6371;
-    const toRadians = (degrees) => degrees * Math.PI / 180;
-    const output = {east: [], south: [], west: [], north: []}
-
-    const lat1Rad = toRadians(22.3), lon1Rad = toRadians(114.2);
-    let cpa = 800;
-    points.forEach(point => {
-        const lat2Rad = toRadians(point[0]), lon2Rad = toRadians(point[1]);
-
-        const dLat = lat2Rad - lat1Rad, dLon = lon2Rad - lon1Rad;
-
-        const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.sin(dLon / 2) ** 2;
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        const distance = Math.round(R * c);
-        distance < cpa && (cpa = distance);
-
-        const y = Math.sin(dLon) * Math.cos(lat2Rad);
-        const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLon);
-        let bearing = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-
-        const leftR = 10;
-        if (bearing < 45 - leftR || bearing > 315 - leftR) {
-            output.north.push(distance);
-        } else if (bearing <= 135 - leftR) {
-            output.east.push(distance);
-        } else if (bearing < 225 - leftR - 10) {
-            output.south.push(distance);
-        } else {
-            output.west.push(distance);
-        }
-    });
-    return Object.fromEntries(Object.entries(output).map(([quad, dists]) => [quad, Math.min(...dists)]))
-}
